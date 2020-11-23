@@ -20,6 +20,7 @@
   "homepage": "https://github.com/mikkelrev22/infinitescroll#readme",
   "dependencies": {
     "@babel/core": "^7.12.7",
+    "@babel/plugin-syntax-class-properties": "^7.12.1",
     "@babel/preset-env": "^7.12.7",
     "@babel/preset-react": "^7.12.7",
     "axios": "^0.21.0",
