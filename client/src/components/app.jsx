@@ -1,7 +1,6 @@
 import React from 'react'
 import axios from 'axios'
 import Card from './Card.jsx'
-import InfiniteScroll from 'react-infinite-scroll-component'
 
 class App extends React.Component {
   constructor () {
@@ -13,7 +12,8 @@ class App extends React.Component {
       hasMore: false,
       loading: false,
       error: false,
-      nextPage: ''
+      nextPage: '', 
+      prevY: 0  
     }
     this.handleChangeCMC = this.handleChangeCMC.bind(this)
     this.handleChangeColor = this.handleChangeColor.bind(this)
@@ -27,18 +27,33 @@ class App extends React.Component {
     this.setState({CMC: e.target.value})
   }
   handleSubmit = (e) => {
+  this.setState({cardArray: []})
    this.getRequest()
     e.preventDefault()
+
+    var options = {
+      root: null,
+      rootMargin: "0px",
+      threshold: 1.0
+    };
+    
+    this.observer = new IntersectionObserver(
+      this.handleObserver.bind(this),
+      options
+    );
+    this.observer.observe(this.loadingRef);
   }
   getRequest = () => {
     this.setState({error: false})
     this.setState({loading: true})
-    axios.get(`https://api.scryfall.com/cards/search?q=c%3A${this.state.color}+cmc%3D${this.state.CMC}`)
+    let pageToGet = `https://api.scryfall.com/cards/search?q=c%3A${this.state.color}+cmc%3D${this.state.CMC}`
+    if (this.state.hasMore) pageToGet = this.state.nextPage
+    axios.get(pageToGet)
     .then((res)=>{
       console.log(res.data)
       const cardArray = res.data.data
-      const mappedCardArray= cardArray.map(card=> card.image_uris.small)        
-      this.setState({cardArray: [...mappedCardArray]})
+      const mappedCardArray= cardArray.filter((card)=> {return !!(card.image_uris.small)}).map(card=> card.image_uris.small)      
+      this.setState({cardArray: [...this.state.cardArray, ...mappedCardArray]})
       if (res.data.has_more) {
         this.setState({nextPage: res.data.next_page, hasMore: res.data.has_more})
       }
@@ -53,7 +68,16 @@ class App extends React.Component {
       this.setState({error: true})
     })
   }
-
+  handleObserver(entities, observer) {
+    const y = entities[0].boundingClientRect.y;
+    if (this.state.prevY > y) {
+      const lastCard = this.state.cardArray[this.state.cardArray.length - 1];
+      const curPage = lastCard;
+      this.getRequest();
+      this.setState({ page: curPage });
+    }
+    this.setState({ prevY: y });
+  }
   render() {
     return (
       <div>
@@ -80,7 +104,7 @@ class App extends React.Component {
         <div>
           <Card cards={this.state.cardArray}/>
         </div>
-        <div>
+        <div ref={loadingRef => (this.loadingRef = loadingRef)}>
           {this.state.loading && 'Loading...'}
         </div>
         <div>
