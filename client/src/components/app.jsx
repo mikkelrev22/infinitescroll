@@ -1,31 +1,92 @@
 import React from 'react'
 import axios from 'axios'
+import Card from './Card.jsx'
+import InfiniteScroll from 'react-infinite-scroll-component'
 
 class App extends React.Component {
   constructor () {
     super ()
     this.state = {
-      value: '',
-      return: []
+      color: 'white',
+      CMC: '',
+      cardArray: [],
+      hasMore: false,
+      loading: false,
+      error: false,
+      nextPage: ''
     }
-    this.handleChange = this.handleChange.bind(this)
+    this.handleChangeCMC = this.handleChangeCMC.bind(this)
+    this.handleChangeColor = this.handleChangeColor.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
+    this.getRequest = this.getRequest.bind(this)
   }
-  handleChange = (e) => {
-    this.setState({value: e.target.value})
+  handleChangeColor = (e) => {
+    this.setState({color: e.target.value})
   }
-  handleSubmit = () => {
-    alert('hello')
+  handleChangeCMC = (e) => {
+    this.setState({CMC: e.target.value})
   }
+  handleSubmit = (e) => {
+   this.getRequest()
+    e.preventDefault()
+  }
+  getRequest = () => {
+    this.setState({error: false})
+    this.setState({loading: true})
+    axios.get(`https://api.scryfall.com/cards/search?q=c%3A${this.state.color}+cmc%3D${this.state.CMC}`)
+    .then((res)=>{
+      console.log(res.data)
+      const cardArray = res.data.data
+      const mappedCardArray= cardArray.map(card=> card.image_uris.small)        
+      this.setState({cardArray: [...mappedCardArray]})
+      if (res.data.has_more) {
+        this.setState({nextPage: res.data.next_page, hasMore: res.data.has_more})
+      }
+      else {
+        this.setState({nextPage: null, hasMore: false})
+      }
+      this.setState({loading: false}) 
+    })
+    .catch(error=> {
+      console.log(error)
+      this.setState({loading: false})
+      this.setState({error: true})
+    })
+  }
+
   render() {
     return (
-      <form onSubmit={this.handleSubmit}>
-        <label>
-          Query:
-          <input type="text" value={this.state.value} onChange={this.handleChange} />
-        </label>
-        <input type="submit" value="Submit" />
-      </form>
+      <div>
+        <div>
+        <form onSubmit={this.handleSubmit}>
+          <label>
+            Select a color:
+            <select value={this.state.color} onChange={this.handleChangeColor}>
+              <option value="white">white</option>
+              <option value="red">red</option>
+              <option value="black">black</option>
+              <option value="blue">blue</option>
+              <option value="green">green</option>
+            </select>
+          </label>
+          <label>
+              Converted mana cost:
+              <input type="text" value={this.state.CMC} onChange={this.handleChangeCMC} />
+          </label>
+          <input type="submit" value="Search"/>
+        </form>
+      </div>
+      
+        <div>
+          <Card cards={this.state.cardArray}/>
+        </div>
+        <div>
+          {this.state.loading && 'Loading...'}
+        </div>
+        <div>
+          {this.state.error && 'An error occurred!'}
+        </div>
+     </div>
     );
   } 
 }
