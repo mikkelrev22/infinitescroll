@@ -108,7 +108,7 @@ class App extends React.Component {
         </form>
       </div>
       
-        <div>
+        <div className=  "list-of-cards">
           <Card cards={this.state.cardArray}/>
         </div>
         <div ref={loadingRef => (this.loadingRef = loadingRef)}>

@@ -1,0 +1,17 @@
+ul {
+  list-style-type: none;
+}
+li {
+  list-style-position: outside;
+  margin-bottom: 25px;
+}
+.card-container {
+  text-align: center;
+}
+
+.list-of-cards {
+  align-content: center;
+}
+img {
+  padding-right: 50px;
+}

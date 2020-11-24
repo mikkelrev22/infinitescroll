@@ -4,7 +4,7 @@ const Card = (props) => {
   const cardList = props.cards
   const mappedCards = cardList.map((card, i)=>
   <li key={i}> 
-  <div><img src={card}></img>{i + 1}</div>
+  <div className="card-container"><img src={card}></img>{i+1}</div>
   </li>)
   return (
     <ul>
