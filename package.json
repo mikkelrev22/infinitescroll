@@ -31,7 +31,6 @@
     "nodemon": "^2.0.6",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
-    "react-infinite-scroll-component": "^5.1.0",
     "webpack": "^5.6.0",
     "webpack-cli": "^4.2.0"
   }
